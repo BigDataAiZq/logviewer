@@ -9,6 +9,8 @@ import org.jflame.commons.util.IOHelper;
 import org.jflame.commons.util.MathHelper;
 import org.jflame.commons.util.UrlHelper;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -74,6 +76,36 @@ public class SFTPClient extends BaseJchClient {
     }
 
     /**
+     * 上传文件
+     *
+     * @param directory  上传的目录-相对于SFPT设置的用户访问目录， 为空则在SFTP设置的根目录进行创建文件（除设置了服务器全磁盘访问）
+     * @param uploadFile 要上传的文件全路径
+     */
+    public  boolean upload(String directory, String uploadFile) throws Exception {
+        ChannelSftp sftp = null;
+        try {
+            try {
+                sftp = openChannel();
+                sftp.cd(directory); // 进入目录
+            } catch (SftpException sException) {
+                if (sftp.SSH_FX_NO_SUCH_FILE == sException.id) { // 指定上传路径不存在
+                    sftp.mkdir(directory);// 创建目录
+                    sftp.cd(directory); // 进入目录
+                }
+            }
+
+            File file = new File(uploadFile);
+            InputStream in = new FileInputStream(file);
+
+            sftp.put(in, file.getName());
+            in.close();
+        } catch (Exception e) {
+            throw new Exception(e.getMessage(), e);
+        }
+        return true;
+    }
+
+    /**
      * 读取sftp上指定文件数据
      * 
      * @param remoteFile
@@ -98,7 +130,7 @@ public class SFTPClient extends BaseJchClient {
      * 读取sftp上指定（文本）文件数据,并按行返回数据集合
      *
      * @param remoteFile
-     * @param charsetName
+     * @param charset
      * @return
      */
     public String getFileContent(String remoteFile, Charset charset) throws RemoteAccessException {

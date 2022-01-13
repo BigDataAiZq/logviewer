@@ -65,7 +65,7 @@ public class SSHClient extends BaseJchClient {
      * 异步执行命令
      * 
      * @param cmd
-     * @param handler
+     * @param callBack
      * @throws RemoteAccessException
      */
     public void execAsync(final String cmd, final AsyncCmdCallBack callBack) throws RemoteAccessException {
