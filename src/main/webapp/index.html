@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>登录-日志查看</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<style type="text/css">
+#loginDiv{margin-top:100px;margin-left:200px;width:400px}
+p{line-height:200%}
+label{display: inline-block;width:75px}
+input{width: 200px;height:24px;line-height:24px;vertical-align:middle;}
+#validcodeImg{cursor: pointer;margin-left:5px;vertical-align:middle;}
+#btnP{padding-left:75px;}
+#btnP button{width:70px;height:30px; text-align:center;}
+</style>
+</head>
+<body>
+<div id="loginDiv">
+		<p><label>用户名:</label> <input id="uname" name="uname" type="text" maxlength="10"></p>
+		<p><label>密码:</label> <input id="upwd" name="upwd" type="password" maxlength="30"></p>
+		<p><label>验证码:</label> <input id="validcode" name="validcode" style="width:100px" onfocus="startValidCode()">
+		<img id="validcodeImg" alt="验证码" title="点击刷新" onclick="refreshValidCode()"></p>
+		<p id="btnP"><button onclick="login()" id="btnLogin" > 登 录 </button></p>
+</div>
+<script type="text/javascript">
+function login(){
+	var n=$('#uname').val();
+	var p=$('#upwd').val();
+	var v=$('#validcode').val();
+	if(isEmpty(n)){
+		alert("请输入用户名");
+		return;
+	}
+	if(isEmpty(p)){
+		alert("请输入密码");
+		return;
+	}
+	if(isEmpty(v)){
+		alert("请输入验证码");
+		return;
+	}
+	var up=encode(n+"__"+p);
+	$.ajax({
+		url:ctxUrl('/login'),
+		method:'POST',
+		data:{uname:up,vcode:v,r:random(10,20)},
+		dataType:"json",
+		success:function(result){
+			if(result&&result.status==200){
+				location.href="main.html";
+			}else{
+				alert(result.message);
+			}
+		}
+	});
+}
+function startValidCode(){
+	if($('#validcodeImg').prop("src")==""){
+		refreshValidCode();
+	}
+}
+function refreshValidCode(){
+	var r=random(10,1000);
+	$('#validcodeImg').prop("src",ctxUrl('/validcode')+"?h=30&r="+r)
+}
+//回车事件
+$("body").keydown(function() {
+    if (event.keyCode == "13") {
+        $('#btnLogin').click();
+    }
+});
+</script>
+</body>
+</html>
